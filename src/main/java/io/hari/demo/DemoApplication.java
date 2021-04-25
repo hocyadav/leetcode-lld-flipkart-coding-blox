@@ -15,9 +15,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.math.BigInteger;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @SpringBootApplication
 @RequiredArgsConstructor
@@ -36,6 +38,8 @@ public class DemoApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+//        h2DataBaseSQLTest();
+
         System.out.println("config = " + config);
         //todo : create user
         final User userHariom = User.builder().username("hariom").build();
@@ -98,5 +102,14 @@ public class DemoApplication implements CommandLineRunner {
         System.out.println("contest1History = " + contest1History);
         final List<String> contest3History2 = contestService.contestHistory(contest3);//chandan
         System.out.println("contest3History = " + contest3History2);
+    }
+
+    private void h2DataBaseSQLTest() throws SQLException {
+//        final String url = "jdbc:h2:~/test";
+        final String url = "jdbc:h2:mem";
+        final String user = "sa";
+        final String password = "";
+        Connection conn = DriverManager.getConnection(url, user, password);
+        conn.close();
     }
 }
