@@ -5,7 +5,9 @@ import io.hari.demo.constant.Level;
 import io.hari.demo.dao.ContestDao;
 import io.hari.demo.dao.QuestionDao;
 import io.hari.demo.dao.UserDao;
-import io.hari.demo.entity.*;
+import io.hari.demo.entity.Contest;
+import io.hari.demo.entity.Question;
+import io.hari.demo.entity.User;
 import io.hari.demo.service.ContestService;
 import io.hari.demo.service.QuestionService;
 import io.hari.demo.service.UserService;
@@ -15,9 +17,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.math.BigInteger;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -104,12 +103,4 @@ public class DemoApplication implements CommandLineRunner {
         System.out.println("contest3History = " + contest3History2);
     }
 
-    private void h2DataBaseSQLTest() throws SQLException {
-//        final String url = "jdbc:h2:~/test";
-        final String url = "jdbc:h2:mem";
-        final String user = "sa";
-        final String password = "";
-        Connection conn = DriverManager.getConnection(url, user, password);
-        conn.close();
-    }
 }
