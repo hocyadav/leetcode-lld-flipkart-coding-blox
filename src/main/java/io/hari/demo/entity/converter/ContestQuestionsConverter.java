@@ -1,7 +1,7 @@
 package io.hari.demo.entity.converter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.hari.demo.entity.ContestQuestions;
+import io.hari.demo.entity.helper.ContestQuestions;
 import lombok.SneakyThrows;
 
 import javax.persistence.AttributeConverter;

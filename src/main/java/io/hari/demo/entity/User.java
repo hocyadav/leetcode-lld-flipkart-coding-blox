@@ -1,11 +1,14 @@
 package io.hari.demo.entity;
 
-import io.hari.demo.entity.converter.ContestQuestionsConverter;
+import io.hari.demo.entity.converter.UserContestQuestionsConverter;
+import io.hari.demo.entity.helper.UserContestQuestions;
 import lombok.*;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.math.BigInteger;
-import java.util.List;
 
 /**
  * @Author hayadav
@@ -15,19 +18,17 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = {"contests"}, callSuper = true)
+@ToString(callSuper = true)
 @Builder
 @Entity
 @Table(name = "users")
-public class User extends BaseEntity{
+public class User extends BaseEntity {
     @Column(unique = true)
     String username;
 
     BigInteger score;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    List<Contest> contests;
-
-    @Convert(converter = ContestQuestionsConverter.class)
-    ContestQuestions contestQuestions;
+    @Builder.Default
+    @Convert(converter = UserContestQuestionsConverter.class)
+    UserContestQuestions userContestQuestions = new UserContestQuestions();
 }

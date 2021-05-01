@@ -2,6 +2,7 @@ package io.hari.demo.service;
 
 import io.hari.demo.dao.QuestionDao;
 import io.hari.demo.constant.Level;
+import io.hari.demo.entity.Contest;
 import io.hari.demo.entity.Question;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,22 +27,34 @@ public class QuestionService {
         if (allByLevel.size() == 0) return questionDao.findAll();
         return allByLevel;
     }
-
-    public List<Long> randomQuestion(int totalQuestions) {//20
-        final Random random = new Random();
-        int randomQuestionsCount = random.nextInt(totalQuestions);//3
-        while (randomQuestionsCount == 0) randomQuestionsCount = random.nextInt(totalQuestions);
-        final List<Long> randomQuestionIds = generateRandomQuestionIds(totalQuestions, randomQuestionsCount);
-        return randomQuestionIds;
+    public List<Long> getContestQuestions(Contest contest) {
+        final int totalContestQuestionCount = contest.getContestQuestions().getQuestions().size();
+        final List<Long> randomQuestionIndex = randomQuestionIndex(totalContestQuestionCount);
+        List<Long> randomQuestion = new LinkedList<>();
+        for (Long index : randomQuestionIndex) {
+            final List<Long> questions = contest.getContestQuestions().getQuestions();
+            final Long actualQueId = questions.get(Integer.valueOf(String.valueOf(index)));
+            randomQuestion.add(actualQueId);
+        }
+        return randomQuestion;
     }
 
-    public List<Long> generateRandomQuestionIds(int maxLimitBound, int count) {//20, 3
+    public List<Long> randomQuestionIndex(int totalContestQuestionCount) {//20
+        final Random random = new Random();
+        int userQuestionCount = random.nextInt(totalContestQuestionCount);//3
+        while (userQuestionCount == 0) userQuestionCount = random.nextInt(totalContestQuestionCount);
+        return findRandomHelper(totalContestQuestionCount, userQuestionCount);
+    }
+
+    public List<Long> findRandomHelper(int maxLimitBound, int count) {//20, 3
         final Random random = new Random();
         List<Long> list = new LinkedList<>();
         for (int j = 0; j < count; j++) {
-            final int nextInt = random.nextInt(maxLimitBound) + 1;
-            //duplicate
-            list.add(Long.valueOf(nextInt));
+            Long newRandomValue = Long.valueOf(random.nextInt(maxLimitBound));
+            while (list.contains(newRandomValue)) { //duplicate check: if already present, find different random values
+                newRandomValue = Long.valueOf(random.nextInt(maxLimitBound));
+            }
+            list.add(newRandomValue);
         }
         return list;
     }

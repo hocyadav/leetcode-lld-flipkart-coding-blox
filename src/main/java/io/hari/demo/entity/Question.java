@@ -13,7 +13,7 @@ import java.math.BigInteger;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = {}, callSuper = true)
+@ToString(callSuper = true)
 @Builder
 @Entity
 @Table(name = "questions")

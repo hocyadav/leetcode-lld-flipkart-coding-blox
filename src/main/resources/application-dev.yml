@@ -5,11 +5,8 @@ spring.h2.console.enabled: true
 
 # app config
 app-config:
-  simpleKey: "value"
   score_constant:
     low: 50
     medium: 30
     high: 0
-
-
-
+  contestQuestionAssignment: all_questions # expected value: all_questions or random_questions

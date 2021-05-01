@@ -6,15 +6,22 @@ import io.hari.demo.constant.Level;
 import io.hari.demo.dao.ContestDao;
 import io.hari.demo.dao.QuestionDao;
 import io.hari.demo.dao.UserDao;
-import io.hari.demo.entity.*;
+import io.hari.demo.entity.Contest;
+import io.hari.demo.entity.Question;
+import io.hari.demo.entity.User;
+import io.hari.demo.entity.helper.ContestQuestions;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ContestService {
@@ -22,6 +29,7 @@ public class ContestService {
     private final QuestionDao questionDao;
     private final UserDao userDao;
     private final AppConfig config;
+    private final UserService userService;
 
 
     public Contest createContest(String contestName, Level contestLevel, User user) {
@@ -34,74 +42,46 @@ public class ContestService {
                 .status(ContestStatus.started)
                 .contestQuestions(contestQuestions)
                 .build();
-
         contestDao.save(newContest);
         setContestToUser(user, newContest);
         return newContest;
     }
 
+    private void setContestToUser(User fetchedUser, Contest contest) {
+        userService.setUserContestQuestion(fetchedUser, contest);
+        userDao.save(fetchedUser);
+    }
+
+    /**
+     * Approach:
+     * find all contest user
+     * for each user get questions
+     * calculate score & update
+     * contest status ended
+     */
     public void runContest(Contest contest) {
         validateContest(contest);
-        final List<User> allUserByContestsId = userDao.findAllByContestsId(contest.getUserId());
+        final List<User> allContestUser = userService.findAllContestUser(contest.getId());
         final String contestLevel = contest.getLevel().toString();
         final BigInteger scoreConstant = config.getScoreConstant().get(contestLevel);
         //for all user solve question and update score
-        allUserByContestsId.forEach(user -> {
-            final List<Question> userQuestions = getUserQuestions(user);
+        allContestUser.forEach(user -> {
+            final List<Question> userQuestions = getUserQuestions(user, contest.getId());
             calculateUserNewScore(scoreConstant, user, userQuestions);
         });
         contest.setStatus(ContestStatus.ended);
         contestDao.save(contest);
     }
 
-    public void withdrawContest(User user, Contest contest) {
-        //todo
-        validateContest(contest);
-        final Optional<User> optionalUser = userDao.findById(user.getId());
-        optionalUser.ifPresent(user1 -> {
-            final List<Contest> contests = user1.getContests();
-            user1.setContests(null);
-            final Collection<Contest> intersection = CollectionUtils.intersection(contests, Arrays.asList(contest));
-            final List<Contest> collect = intersection.stream().collect(Collectors.toList());
-            user1.setContests(collect);
-            userDao.save(user1);
-        });
-    }
-
-    public List<String> contestHistory(Contest contest) {
-        final List<User> allByContestsId = userDao.findAllByContestsId(contest.getId());
-        final List<String> usersList = allByContestsId.stream().map(i -> i.getUsername()).collect(Collectors.toList());
-        return usersList;
-    }
-
-    private void validateContest(Contest contest) {
-        if (!contest.getStatus().equals(ContestStatus.started)) {
-            System.out.println("contest not started yet");
-            throw new RuntimeException("contest not started yet");
-        }
-    }
-
-    private void setContestToUser(User user, Contest contest) {
-        final User fetchedUser = userDao.findById(user.getId()).get();
-        fetchedUser.setContests(Arrays.asList(contest));
-        fetchedUser.setContestQuestions(contest.getContestQuestions());
-        userDao.save(fetchedUser);
-    }
-
-    private List<Long> contestLevelWiseAllQuestions(Level questionLevel) {
-        final List<Question> questions = questionDao.findAllByLevelQuestions(questionLevel.toString());
-        final List<Long> questionIds = questions.stream().map(i -> i.getId()).collect(Collectors.toList());
-        return questionIds;
-    }
-
-    private List<Question> getUserQuestions(User user) {
-        final List<Long> questions = user.getContestQuestions().getQuestions();
+    private List<Question> getUserQuestions(User user, Long contestId) {
+        final List<Long> questions = user.getUserContestQuestions().getUserContestQuestions().get(contestId);
+        if (questions == null) return new LinkedList<>();
         final List<Question> userQuestions = questions.stream().map(i -> questionDao.findById(i).get()).filter(Objects::nonNull)
                 .collect(Collectors.toList());
         return userQuestions;
     }
 
-    private void calculateUserNewScore(BigInteger scoreConstant, User user, List<Question> userQuestions) {
+    public User calculateUserNewScore(BigInteger scoreConstant, User user, List<Question> userQuestions) {
         final BigInteger calculatedScore = userQuestions.stream()
                 .map(i -> i.getScore())
                 .reduce(BigInteger::add).orElseGet(() -> BigInteger.ZERO);
@@ -112,7 +92,53 @@ public class ContestService {
         final BigInteger newScore = currentScore.add(calculatedScore).subtract(scoreConstant);//todo
         System.out.println("newScore user score = " + newScore);
         user.setScore(newScore);
-        userDao.save(user);
+        return userDao.save(user);
     }
 
+    private List<Long> contestLevelWiseAllQuestions(Level questionLevel) {
+        final List<Question> questions = questionDao.findAllByLevelQuestions(questionLevel.toString());
+        final List<Long> questionIds = questions.stream().map(i -> i.getId()).collect(Collectors.toList());
+        return questionIds;
+    }
+
+    //bonus functionality : implementations not required
+    public void withdrawContest(User user1, Contest contest) {
+        if (contest.getStatus().equals(ContestStatus.ended)) {
+            log.warn("user: [{}] , contest: [{}] ended not able to delete", user1.getUsername(), contest.getName());
+            return;
+        }
+        final Map<Long, List<Long>> userContestQuestions = user1.getUserContestQuestions().getUserContestQuestions();
+        if (userContestQuestions.containsKey(contest.getId())) {
+            userContestQuestions.remove(contest.getId());
+            userDao.save(user1);
+            log.info("user: [{}] , contest: [{}] , withdraw successful", user1.getUsername(), contest.getName());
+        }
+    }
+
+    //bonus functionality : implementations not required
+    public List<String> contestHistory(Contest contest) {
+        final List<User> allContestUser = userService.findAllContestUser(contest.getId());
+        log.info("contest: [{}],  user list: {}", contest.getName(), allContestUser.stream().map(User::getId).collect(Collectors.toList()));
+        List<String> list = new LinkedList<>();
+        final BigInteger scoreConstant = config.getScoreConstant().get(contest.getLevel().toString());
+        allContestUser.forEach(user -> {
+            final List<Question> userQuestions = getUserQuestions(user, contest.getId());
+
+            final User user1 = calculateUserNewScore(scoreConstant, user, userQuestions);
+            final List<Long> userQuestion1s = user1.getUserContestQuestions().getUserContestQuestions().get(contest.getId());
+            String userHistory = "username: " + user1.getUsername() + " score: " + user1.getScore() + " questions: " + userQuestion1s;
+            list.add(userHistory);
+        });
+        return list;
+    }
+
+    private void validateContest(Contest contest) {
+        if (contest.getStatus().equals(ContestStatus.in_progress)) {
+            System.out.println("contest not started yet");
+            throw new RuntimeException("contest not started yet");
+        }
+        if (contest.getStatus().equals(ContestStatus.ended)) {
+            throw new RuntimeException("contest ended");
+        }
+    }
 }

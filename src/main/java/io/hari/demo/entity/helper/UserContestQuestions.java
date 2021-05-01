@@ -1,14 +1,14 @@
-package io.hari.demo.entity;
+package io.hari.demo.entity.helper;
 
 import lombok.*;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 /**
  * @Author hayadav
- * @create 4/24/2021
  */
 @Getter
 @Setter
@@ -16,7 +16,6 @@ import java.util.Map;
 @AllArgsConstructor
 @Builder
 @ToString
-public class ContestQuestions {
-//    Map<Long, List<Long>>
-    List<Long> questions = new LinkedList<>();
+public class UserContestQuestions {
+    Map<Long, List<Long>> userContestQuestions = new HashMap<>();
 }
