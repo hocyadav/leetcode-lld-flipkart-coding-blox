@@ -95,14 +95,11 @@ public class DemoApplication implements CommandLineRunner {
         System.out.println("leader board");
         leaderBoard.forEach(System.out::println);
 
-        //todo : withdraw contest test : create contest -> check contest history -> withdraw contest -> check contest history again
-        final Contest contest3 = contestService.createContest("contest 3", Level.high, chandan);
-        userService.assignContestToUser(naveen, contest3);
+        //todo : contest history
+        System.out.println("\ncheck history");
+        contestService.contestHistory(contest1).forEach(System.out::println);
 
-        System.out.println("\ncheck history");
-        contestService.contestHistory(contest3).forEach(System.out::println);//chandan , naveen
-        contestService.withdrawContest(naveen, contest3);
-        System.out.println("\ncheck history");
-        contestService.contestHistory(contest3).forEach(System.out::println);//naveen
+        //todo : withdraw contest (not working)
+//        contestService.withdrawContest(naveen, contest2);
     }
 }

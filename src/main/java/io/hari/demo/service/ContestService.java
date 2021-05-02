@@ -15,10 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -48,8 +45,11 @@ public class ContestService {
     }
 
     private void setContestToUser(User fetchedUser, Contest contest) {
-        userService.setUserContestQuestion(fetchedUser, contest);
-        userDao.save(fetchedUser);
+        final Optional<User> optionalUser = userDao.findById(fetchedUser.getId());
+        optionalUser.ifPresent(user -> {
+            userService.setUserContestQuestion(user, contest);
+            userDao.save(user);
+        });
     }
 
     /**
@@ -62,6 +62,7 @@ public class ContestService {
     public void runContest(Contest contest) {
         validateContest(contest);
         final List<User> allContestUser = userService.findAllContestUser(contest.getId());
+        log.info("allContestUser ------ = " + allContestUser.stream().map(i -> i.getUsername()).collect(Collectors.toList()));
         final String contestLevel = contest.getLevel().toString();
         final BigInteger scoreConstant = config.getScoreConstant().get(contestLevel);
         //for all user solve question and update score
@@ -75,9 +76,11 @@ public class ContestService {
 
     private List<Question> getUserQuestions(User user, Long contestId) {
         final List<Long> questions = user.getUserContestQuestions().getUserContestQuestions().get(contestId);
+        log.info("User: {}", user.getUsername());
         if (questions == null) return new LinkedList<>();
         final List<Question> userQuestions = questions.stream().map(i -> questionDao.findById(i).get()).filter(Objects::nonNull)
                 .collect(Collectors.toList());
+        log.info("User questions: {}", userQuestions.stream().map(Question::getId).collect(Collectors.toList()));
         return userQuestions;
     }
 
