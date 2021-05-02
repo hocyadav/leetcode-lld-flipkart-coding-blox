@@ -1,6 +1,9 @@
 # leetcode-lld-flipkart-coding-blox
 Machine coding - leetcode LLD (coding blox)
 
+
+My Approach : https://leetcode.com/discuss/interview-question/object-oriented-design/1177601/Flipkart-or-Machine-Coding-or-Design-Online-Coding-Platform-CODING-BLOX-Leetcode-LLD
+
 **CODING BLOX**
 
 - Coding Blox is an Online Coding Platform that allows a user to Sign Up, Create Contests and participate in Contests hosted by Others.
