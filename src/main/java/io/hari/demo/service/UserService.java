@@ -9,7 +9,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import static io.hari.demo.config.AppConfig.ContestQuestionAssignment.all_questions;
+import static io.hari.demo.config.AppConfig.ContestQuestionAssignment.random_questions;
 
 @Service
 @RequiredArgsConstructor
@@ -37,17 +43,14 @@ public class UserService {
 
     public void setUserContestQuestion(User user, Contest contest) {
         validateUserAndContest(user, contest);
-
-        List<Long> questions = new LinkedList<>();
-        if (config.getContestQuestionAssignment().equals(AppConfig.ContestQuestionAssignment.all_questions)) {
-            questions = contest.getContestQuestions().getQuestions();
-        } else if (config.getContestQuestionAssignment().equals(AppConfig.ContestQuestionAssignment.random_questions)) {
-            questions = questionService.getContestQuestions(contest);
+        List<Long> contestQuestions = new LinkedList<>();
+        if (config.getContestQuestionAssignment().equals(all_questions)) {
+            contestQuestions = contest.getContestQuestions().getQuestions();
+        } else if (config.getContestQuestionAssignment().equals(random_questions)) {
+            contestQuestions = questionService.getContestQuestions(contest);
         }
-        final Map<Long, List<Long>> userContestQuestionsMap = user.getUserContestQuestions().getUserContestQuestions();
-        if (!userContestQuestionsMap.containsKey(contest.getId())) {
-            userContestQuestionsMap.put(contest.getId(), questions);
-        }
+        final Map<Long, List<Long>> fetchContestQuestions = user.getUserContestQuestions().getUserContestQuestions();
+        fetchContestQuestions.putIfAbsent(contest.getId(), contestQuestions);
     }
 
     public void validateUserAndContest(User user, Contest contest) {
