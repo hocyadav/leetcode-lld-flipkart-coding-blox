@@ -75,7 +75,7 @@ public class ContestService {
     }
 
     private List<Question> getUserQuestions(User user, Long contestId) {
-        final List<Long> questions = user.getUserContestQuestions().getUserContestQuestions().get(contestId);
+        final List<Long> questions = user.getUserContestQuestions().getContestQuestionsMap().get(contestId);
         log.info("User: {}", user.getUsername());
         if (questions == null) return new LinkedList<>();
         final List<Question> userQuestions = questions.stream().map(i -> questionDao.findById(i).get()).filter(Objects::nonNull)
@@ -110,7 +110,7 @@ public class ContestService {
             log.warn("user: [{}] , contest: [{}] ended not able to delete", user1.getUsername(), contest.getName());
             return;
         }
-        final Map<Long, List<Long>> userContestQuestions = user1.getUserContestQuestions().getUserContestQuestions();
+        final Map<Long, List<Long>> userContestQuestions = user1.getUserContestQuestions().getContestQuestionsMap();
         if (userContestQuestions.containsKey(contest.getId())) {
             userContestQuestions.remove(contest.getId());
             userDao.save(user1);
@@ -128,7 +128,7 @@ public class ContestService {
             final List<Question> userQuestions = getUserQuestions(user, contest.getId());
 
             final User user1 = calculateUserNewScore(scoreConstant, user, userQuestions);
-            final List<Long> userQuestion1s = user1.getUserContestQuestions().getUserContestQuestions().get(contest.getId());
+            final List<Long> userQuestion1s = user1.getUserContestQuestions().getContestQuestionsMap().get(contest.getId());
             String userHistory = "username: " + user1.getUsername() + " score: " + user1.getScore() + " questions: " + userQuestion1s;
             list.add(userHistory);
         });

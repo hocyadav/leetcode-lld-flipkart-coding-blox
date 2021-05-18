@@ -17,5 +17,5 @@ import java.util.Map;
 @Builder
 @ToString
 public class UserContestQuestions {
-    Map<Long, List<Long>> userContestQuestions = new HashMap<>();
+    Map<Long, List<Long>> contestQuestionsMap = new HashMap<>();
 }

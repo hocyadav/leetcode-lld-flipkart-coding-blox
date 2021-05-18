@@ -49,7 +49,7 @@ public class UserService {
         } else if (config.getContestQuestionAssignment().equals(random_questions)) {
             contestQuestions = questionService.getContestQuestions(contest);
         }
-        final Map<Long, List<Long>> fetchContestQuestions = user.getUserContestQuestions().getUserContestQuestions();
+        final Map<Long, List<Long>> fetchContestQuestions = user.getUserContestQuestions().getContestQuestionsMap();
         fetchContestQuestions.putIfAbsent(contest.getId(), contestQuestions);
     }
 
@@ -71,7 +71,7 @@ public class UserService {
     public List<User> findAllContestUser(Long contestId) {
         List<User> users = new LinkedList<>();
         userDao.findAll().forEach(user -> {
-            final Map<Long, List<Long>> userContestQuestions = user.getUserContestQuestions().getUserContestQuestions();
+            final Map<Long, List<Long>> userContestQuestions = user.getUserContestQuestions().getContestQuestionsMap();
             if (userContestQuestions.containsKey(contestId)) users.add(user);
         });
         return users;
