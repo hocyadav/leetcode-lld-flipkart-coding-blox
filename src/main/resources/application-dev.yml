@@ -10,3 +10,4 @@ app-config:
     medium: 30
     high: 0
   contestQuestionAssignment: all_questions # expected value: all_questions or random_questions
+  
