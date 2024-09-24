@@ -20,6 +20,9 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
+// www.google.com
+
+
 @SpringBootApplication
 @RequiredArgsConstructor
 public class DemoApplication implements CommandLineRunner {
@@ -37,9 +40,11 @@ public class DemoApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        System.out.println("Hello..");
+
         //todo check config
         System.out.println("config = " + config);
-
+// docker run --rm --name=firefox -p 8080:5800 -v /docker/appdata/firefox:/config:rw jlesage/firefox
         //todo : create user
         final User hariom = User.builder().username("hariom").build();
         final User chandan = User.builder().username("chandan").build();
