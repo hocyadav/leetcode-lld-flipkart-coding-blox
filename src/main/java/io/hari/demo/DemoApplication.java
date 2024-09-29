@@ -41,7 +41,6 @@ public class DemoApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         System.out.println("Hello..");
-        System.out.println("Hello..");
 
         //todo check config
         System.out.println("config = " + config);
