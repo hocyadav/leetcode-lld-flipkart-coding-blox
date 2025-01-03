@@ -89,4 +89,12 @@ public class UserService {
         });
         return users;
     }
+
+    public void deleteUser(Long id) {
+        userDao.deleteById(id);
+    }
+
+    public List<User> getAllUsers() {
+        return userDao.findAll();
+    }
 }
