@@ -2,8 +2,10 @@ package io.hari.demo.service;
 
 import io.hari.demo.config.AppConfig;
 import io.hari.demo.dao.ContestDao;
+import io.hari.demo.dao.NotificationDao;
 import io.hari.demo.dao.UserDao;
 import io.hari.demo.entity.Contest;
+import io.hari.demo.entity.Notification;
 import io.hari.demo.entity.User;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,9 @@ import java.util.*;
 import static io.hari.demo.config.AppConfig.ContestQuestionAssignment.all_questions;
 import static io.hari.demo.config.AppConfig.ContestQuestionAssignment.random_questions;
 
+/**
+ * @Author Hariom Yadav
+ */
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -22,7 +27,7 @@ public class UserService {
     private final QuestionService questionService;
     private final ContestDao contestDao;
     private final AppConfig config;
-
+    private final NotificationDao notificationDao;
 
     public User create(@NonNull final User user) {
         user.setScore(BigInteger.valueOf(1500));
@@ -38,6 +43,13 @@ public class UserService {
     public void assignContestToUser(@NonNull final User user, @NonNull final Contest contest) {//low -> 20 , 1,2...20
         setUserContestQuestion(user, contest);
         userDao.save(user);
+
+        // Create a notification for the user
+        Notification notification = new Notification();
+        notification.setMessage("A new contest has been assigned to you.");
+        notification.setUserId(user.getId());
+        notificationDao.save(notification);
+        System.out.println("Notification created for user: " + user.getUsername());
     }
 
     public void setUserContestQuestion(@NonNull final User user, @NonNull final Contest contest) {

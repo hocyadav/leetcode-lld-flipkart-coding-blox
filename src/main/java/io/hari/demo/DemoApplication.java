@@ -3,6 +3,7 @@ package io.hari.demo;
 import io.hari.demo.config.AppConfig;
 import io.hari.demo.constant.Level;
 import io.hari.demo.dao.ContestDao;
+import io.hari.demo.dao.NotificationDao;
 import io.hari.demo.dao.QuestionDao;
 import io.hari.demo.dao.UserDao;
 import io.hari.demo.entity.Contest;
@@ -33,6 +34,7 @@ public class DemoApplication implements CommandLineRunner {
     private final ContestDao contestDao;
     private final ContestService contestService;
     private final QuestionService questionService;
+    private final NotificationDao notificationDao;
 
     public static void main(String[] args) {
         SpringApplication.run(DemoApplication.class, args);
@@ -106,5 +108,9 @@ public class DemoApplication implements CommandLineRunner {
 
         //todo : withdraw contest (not working)
 //        contestService.withdrawContest(naveen, contest2);
+
+        // Print notifications
+        System.out.println("\nNotifications:");
+        notificationDao.findAll().forEach(System.out::println);
     }
 }

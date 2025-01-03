@@ -4,9 +4,11 @@ import io.hari.demo.config.AppConfig;
 import io.hari.demo.constant.ContestStatus;
 import io.hari.demo.constant.Level;
 import io.hari.demo.dao.ContestDao;
+import io.hari.demo.dao.NotificationDao;
 import io.hari.demo.dao.QuestionDao;
 import io.hari.demo.dao.UserDao;
 import io.hari.demo.entity.Contest;
+import io.hari.demo.entity.Notification;
 import io.hari.demo.entity.Question;
 import io.hari.demo.entity.User;
 import io.hari.demo.entity.helper.ContestQuestions;
@@ -27,7 +29,7 @@ public class ContestService {
     private final UserDao userDao;
     private final AppConfig config;
     private final UserService userService;
-
+    private final NotificationDao notificationDao;
 
     public Contest createContest(String contestName, Level contestLevel, User user) {
         final List<Long> questions = contestLevelWiseAllQuestions(contestLevel);
@@ -41,6 +43,13 @@ public class ContestService {
                 .build();
         contestDao.save(newContest);
         setContestToUser(user, newContest);
+
+        // Create a notification for the user
+        Notification notification = new Notification();
+        notification.setMessage("A new contest has been created.");
+        notification.setUserId(user.getId());
+        notificationDao.save(notification);
+
         return newContest;
     }
 
